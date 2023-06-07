@@ -3,15 +3,15 @@ using UnityEngine.UI;
 
 public class BasketballController : MonoBehaviour
 {
-    // Create References
+    // References
     public float MoveSpeed = 10;
-    public GameObject BallPrefab; // Prefab of the ball to spawn
+    public GameObject BallPrefab; 
     public Transform Arms;
     public Transform PosOverHead;
     public Transform PosDribble;
     public Transform Target;
 
-    // Create Variables
+    // Variables
     private GameObject currentBall;
     private bool IsBallInHands = true;
     private bool IsBallFlying = false;
@@ -36,7 +36,6 @@ public class BasketballController : MonoBehaviour
         UpdateTimerText();
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (isGameOver)
@@ -112,8 +111,26 @@ public class BasketballController : MonoBehaviour
                 SpawnNewBall();
 
                 // Add time to the timer
-                timer += 8f;
+                timer += 3f;
                 UpdateTimerText();
+
+                // Set the countdown timer duration for the new ball based on the score
+                if (score >= 10 && score < 20)
+                {
+                    countdownTimer = 3f;
+                }
+                else if (score >= 20 && score < 30)
+                {
+                    countdownTimer = 2f;
+                }
+                else if (score >= 30)
+                {
+                    countdownTimer = 1f;
+                }
+                else if (score >= 40)
+                {
+                    countdownTimer = 0.5f;
+                }
             }
         }
 
@@ -127,6 +144,11 @@ public class BasketballController : MonoBehaviour
                 GameOver();
             }
             UpdateTimerText();
+        }
+        else if (timer <= 0f)
+        {
+            timer = 0f;
+            GameOver();
         }
 
         // Countdown timer
@@ -145,9 +167,23 @@ public class BasketballController : MonoBehaviour
                 timer -= 3f;
                 UpdateTimerText();
 
-                // Reset the countdown timer
-                countdownTimer = 5f;
-                isCountdownActive = false;
+                // Set the countdown timer duration for the new ball based on the score
+                if (score >= 10 && score < 20)
+                {
+                    countdownTimer = 3f;
+                }
+                else if (score >= 20 && score < 30)
+                {
+                    countdownTimer = 2f;
+                }
+                else if (score >= 30 && score < 40)
+                {
+                    countdownTimer = 1f;
+                }
+                else if (score >= 40)
+                {
+                    countdownTimer = 0.5f;
+                }
             }
         }
     }
@@ -165,13 +201,13 @@ public class BasketballController : MonoBehaviour
         }
     }
 
-    // Live Timer update
+    // Update the timer UI Text
     private void UpdateTimerText()
     {
         timerText.text = "Time: " + Mathf.Ceil(timer).ToString();
     }
 
-    // Sets game over to true
+    // Set the game over state
     private void GameOver()
     {
         isGameOver = true;
@@ -200,8 +236,8 @@ public class BasketballController : MonoBehaviour
     private Vector3 GetRandomSpawnPosition()
     {
         // Defines the range for the random spawn position
-        Vector3 spawnRangeMin = new Vector3(-6f, 1f, -6f);
-        Vector3 spawnRangeMax = new Vector3(6f, 1f, 6f);
+        Vector3 spawnRangeMin = new Vector3(-7f, 0.6f, -7f);
+        Vector3 spawnRangeMax = new Vector3(7f, 0.6f, 7f);
 
         // Generates random spawn position within the specified range
         float randomX = Random.Range(spawnRangeMin.x, spawnRangeMax.x);
