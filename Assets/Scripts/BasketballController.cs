@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class BasketballController : MonoBehaviour
@@ -15,15 +16,15 @@ public class BasketballController : MonoBehaviour
     private GameObject currentBall;
     private bool IsBallInHands = true;
     private bool IsBallFlying = false;
+    private bool isCountdownActive = false;
     private float T = 0;
     private int score = 0;
     private float timer = 20f;
+    private float countdownTimer = 5f;
     private bool isGameOver = false;
 
     // Ball spawn parameters
     private Vector3 ballSpawnPosition;
-    private bool isCountdownActive = false;
-    private float countdownTimer = 5f;
 
     // Reference to the UI Text components
     public Text scoreText;
@@ -211,7 +212,9 @@ public class BasketballController : MonoBehaviour
     private void GameOver()
     {
         isGameOver = true;
-        Debug.Log("Game Over");
+        int finalScore = GetScore();
+        SceneManager.LoadScene("GameOver");
+        PlayerPrefs.SetInt("FinalScore", finalScore);
     }
 
     private void SpawnNewBall()
@@ -245,5 +248,10 @@ public class BasketballController : MonoBehaviour
         float randomZ = Random.Range(spawnRangeMin.z, spawnRangeMax.z);
 
         return new Vector3(randomX, randomY, randomZ);
+    }
+
+    private int GetScore()
+    {
+        return score;
     }
 }

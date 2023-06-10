@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/basketball-scene.unity
     guid: ef2b0255f25db38428a23d1f444e4e51
+  - enabled: 1
+    path: Assets/Scenes/GameOver.unity
+    guid: eee7d4ccab0906349bdc613f2ff319ed
   m_configObjects: {}

@@ -8,10 +8,12 @@ public class HoopController : MonoBehaviour {
      public float speed = 2.0f;  // The speed the hoop moves with.
      private Vector3 startPos;
  
+    // Start position of the hoop
      void Start () {
          startPos = transform.position;
      }
      
+     // Makes the hoop move from side to side.
      void Update () {
          Vector3 v = startPos;
          v.x += delta * Mathf.Sin (Time.time * speed);
