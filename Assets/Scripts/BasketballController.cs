@@ -11,9 +11,13 @@ public class BasketballController : MonoBehaviour
     public Transform PosOverHead;
     public Transform PosDribble;
     public Transform Target;
+    public AudioSource src;
+    public AudioClip sfx1;
+    private GameObject currentBall;
+    public Text scoreText;
+    public Text timerText;
 
     // Variables
-    private GameObject currentBall;
     private bool IsBallInHands = true;
     private bool IsBallFlying = false;
     private bool isCountdownActive = false;
@@ -22,13 +26,7 @@ public class BasketballController : MonoBehaviour
     private float timer = 20f;
     private float countdownTimer = 5f;
     private bool isGameOver = false;
-
-    // Ball spawn parameters
     private Vector3 ballSpawnPosition;
-
-    // Reference to the UI Text components
-    public Text scoreText;
-    public Text timerText;
 
     private void Start()
     {
@@ -98,6 +96,9 @@ public class BasketballController : MonoBehaviour
             {
                 IsBallFlying = false;
                 currentBall.GetComponent<Rigidbody>().isKinematic = false;
+
+                src.clip = sfx1;
+                src.Play();
 
                 // Increment the score
                 score++;
