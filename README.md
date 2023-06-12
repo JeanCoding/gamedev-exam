@@ -1,7 +1,7 @@
 
 # Basketball Madness 
 
-Dit readme-bestand biedt instructies hoe je het project kan opstarten.
+In dit readme bestand staan instructies over hoe het unity project op te starten.
 
 [![screenshotgame.png](https://i.postimg.cc/Y2LLH1WH/screenshotgame.png)](https://postimg.cc/XX3YKBLH)
 
