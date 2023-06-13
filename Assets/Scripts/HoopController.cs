@@ -6,7 +6,7 @@ public class HoopController : MonoBehaviour
 {
     public float delta = 1.5f;  // Amount to move left and right from the start point
     public float speed = 2.0f;  // Speed it moves from left to right
-    private Vector3 startPos;   // Starting position of the hoop
+    Vector3 startPos;   // Starting position of the hoop
 
     void Start ()
     {
