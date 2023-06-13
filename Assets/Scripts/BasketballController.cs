@@ -4,28 +4,27 @@ using UnityEngine.UI;
 
 public class BasketballController : MonoBehaviour
 {
-    // References
     public float MoveSpeed = 10;
-    public GameObject BallPrefab; 
+    public GameObject BallPrefab;
     public Transform Arms;
     public Transform PosOverHead;
     public Transform PosDribble;
     public Transform Target;
     public AudioSource src;
     public AudioClip sfx1;
-    private GameObject currentBall;
     public Text scoreText;
     public Text timerText;
 
-    // Variables
-    private bool IsBallInHands = true;
-    private bool IsBallFlying = false;
+    private bool isBallInHands = true;
+    private bool isBallFlying = false;
     private bool isCountdownActive = false;
-    private float T = 0;
+    private float ballThrowDuration = 0.7f;
+    private float t = 0;
     private int score = 0;
     private float timer = 20f;
     private float countdownTimer = 5f;
     private bool isGameOver = false;
+    private GameObject currentBall;
     private Vector3 ballSpawnPosition;
 
     private void Start()
@@ -35,107 +34,109 @@ public class BasketballController : MonoBehaviour
         UpdateTimerText();
     }
 
-    void Update()
+    private void Update()
     {
         if (isGameOver)
             return;
 
-        // Walking
+        HandlePlayerMovement();
+
+        if (isBallInHands)
+            HandleBallInHands();
+        else if (isBallFlying)
+            HandleBallInAir();
+
+        UpdateTimer();
+
+        if (isCountdownActive)
+            UpdateCountdownTimer();
+    }
+
+    private void HandlePlayerMovement()
+    {
+        // Player movement based on input
         Vector3 direction = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
         transform.position += direction * MoveSpeed * Time.deltaTime;
         transform.LookAt(transform.position + direction);
+    }
 
-        // Ball is in your hands
-        if (IsBallInHands)
+    private void HandleBallInHands()
+    {
+        // Ball handling when it is in the player's hands
+        if (Input.GetKey(KeyCode.Space))
         {
-            if (Input.GetKey(KeyCode.Space))
-            {
-                currentBall.transform.position = PosOverHead.position;
-                Arms.localEulerAngles = Vector3.right * 180;
-
-                // Looks towards the basket 
-                transform.LookAt(Target.parent.position);
-            }
-            else
-            {
-                // Creates the bouncing ball and puts the arms down
-                currentBall.transform.position = PosDribble.position + Vector3.up * Mathf.Abs(Mathf.Sin(Time.time * 5));
-                Arms.localEulerAngles = Vector3.right * 0;
-            }
-
-            if (Input.GetKeyUp(KeyCode.Space))
-            {
-                IsBallInHands = false;
-                IsBallFlying = true;
-                T = 0;
-
-                // Stop the countdown timer when the ball is thrown
-                isCountdownActive = false;
-            }
+            // Ball held over the head
+            currentBall.transform.position = PosOverHead.position;
+            Arms.localEulerAngles = Vector3.right * 180; // Arms above your head
+            transform.LookAt(Target.parent.position);
+        }
+        else
+        {
+            // Dribbling the ball
+            currentBall.transform.position = PosDribble.position + Vector3.up * Mathf.Abs(Mathf.Sin(Time.time * 5)); // Bouncing ball effect
+            Arms.localEulerAngles = Vector3.right * 0; // Arms faced towards the ground
         }
 
-        // When the ball is in the air
-        if (IsBallFlying)
+        if (Input.GetKeyUp(KeyCode.Space))
         {
-            T += Time.deltaTime;
-            float duration = 0.7f;
-            float t01 = T / duration;
-
-            // To fly towards the basket
-            Vector3 A = PosOverHead.position;
-            Vector3 B = Target.position;
-            Vector3 pos = Vector3.Lerp(A, B, t01);
-
-            // Move in arc
-            Vector3 arc = Vector3.up * 5 * Mathf.Sin(t01 * Mathf.PI);
-
-            currentBall.transform.position = pos + arc;
-
-            // The moment when ball hits the target
-            if (t01 >= 1)
-            {
-                IsBallFlying = false;
-                currentBall.GetComponent<Rigidbody>().isKinematic = false;
-
-                src.clip = sfx1;
-                src.Play();
-
-                // Increment the score
-                score++;
-
-                // Update the score on the UI Text component
-                scoreText.text = "Score: " + score;
-
-                // Destroy the ball with a small delay
-                DestroyBallWithDelay();
-
-                // Spawn a new ball
-                SpawnNewBall();
-
-                // Add time to the timer
-                timer += 3f;
-                UpdateTimerText();
-
-                // Set the countdown timer duration for the new ball based on the score
-                if (score >= 10 && score < 20)
-                {
-                    countdownTimer = 3f;
-                }
-                else if (score >= 20 && score < 30)
-                {
-                    countdownTimer = 2f;
-                }
-                else if (score >= 30)
-                {
-                    countdownTimer = 1f;
-                }
-                else if (score >= 40)
-                {
-                    countdownTimer = 0.5f;
-                }
-            }
+            // Release the ball and start the throw
+            isBallInHands = false;
+            isBallFlying = true;
+            t = 0;
+            isCountdownActive = false;
         }
+    }
 
+    private void HandleBallInAir()
+    {
+        // Ball behavior when it is in the air after being thrown
+        t += Time.deltaTime;
+        float t01 = t / ballThrowDuration;
+        Vector3 pos = Vector3.Lerp(PosOverHead.position, Target.position, t01); // Fly towards the basket
+        Vector3 arc = Vector3.up * 5 * Mathf.Sin(t01 * Mathf.PI); // Fly with a arc effect
+        currentBall.transform.position = pos + arc;
+
+        if (t01 >= 1)
+        {
+            // Ball has reached the target
+            isBallFlying = false;
+            currentBall.GetComponent<Rigidbody>().isKinematic = false;
+            src.clip = sfx1;
+            src.Play();
+            score++;
+            scoreText.text = "Score: " + score;
+            DestroyBallWithDelay();
+            SpawnNewBall();
+            timer += 3f;
+            UpdateTimerText();
+
+            // Adjust countdown timer based on score
+            if (score >= 10 && score < 20)
+                countdownTimer = 3f;
+            else if (score >= 20 && score < 30)
+                countdownTimer = 2f;
+            else if (score >= 30 && score < 40)
+                countdownTimer = 1f;
+            else if (score >= 40)
+                countdownTimer = 0.5f;
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        // Handle catching the ball and starting the countdown timer
+        if (!isBallInHands && !isBallFlying)
+        {
+            isBallInHands = true;
+            if (currentBall != null)
+                currentBall.GetComponent<Rigidbody>().isKinematic = true;
+            isCountdownActive = true;
+            countdownTimer = 5f;
+        }
+    }
+
+    private void UpdateTimer()
+    {
         // Update the timer
         if (timer > 0f)
         {
@@ -152,107 +153,68 @@ public class BasketballController : MonoBehaviour
             timer = 0f;
             GameOver();
         }
-
-        // Countdown timer
-        if (isCountdownActive)
-        {
-            countdownTimer -= Time.deltaTime;
-            if (countdownTimer <= 0f)
-            {
-                // Destroy the ball with a small delay
-                DestroyBallWithDelay();
-
-                // Spawn a new ball
-                SpawnNewBall();
-
-                // Remove 3 seconds from the timer
-                timer -= 3f;
-                UpdateTimerText();
-
-                // Set the countdown timer duration for the new ball based on the score
-                if (score >= 10 && score < 20)
-                {
-                    countdownTimer = 3f;
-                }
-                else if (score >= 20 && score < 30)
-                {
-                    countdownTimer = 2f;
-                }
-                else if (score >= 30 && score < 40)
-                {
-                    countdownTimer = 1f;
-                }
-                else if (score >= 40)
-                {
-                    countdownTimer = 0.5f;
-                }
-            }
-        }
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void UpdateCountdownTimer()
     {
-        if (!IsBallInHands && !IsBallFlying)
+        // Update the countdown timer
+        countdownTimer -= Time.deltaTime;
+        if (countdownTimer <= 0f)
         {
-            IsBallInHands = true;
-            if (currentBall != null)
-                currentBall.GetComponent<Rigidbody>().isKinematic = true;
+            DestroyBallWithDelay();
+            SpawnNewBall();
+            timer -= 3f;
+            UpdateTimerText();
 
-            isCountdownActive = true;
-            countdownTimer = 5f;
+            // Adjust countdown timer based on score
+            if (score >= 10 && score < 20)
+                countdownTimer = 3f;
+            else if (score >= 20 && score < 30)
+                countdownTimer = 2f;
+            else if (score >= 30 && score < 40)
+                countdownTimer = 1f;
+            else if (score >= 40)
+                countdownTimer = 0.5f;
         }
     }
 
-    // Update the timer UI Text
     private void UpdateTimerText()
     {
+        // Update the timer UI text
         timerText.text = "Time: " + Mathf.Ceil(timer).ToString();
     }
 
-    // Set the game over state
     private void GameOver()
     {
+        // Set the game over state and load the game over scene
         isGameOver = true;
-        int finalScore = GetScore();
         SceneManager.LoadScene("GameOver");
-        PlayerPrefs.SetInt("FinalScore", finalScore);
+        PlayerPrefs.SetInt("FinalScore", score);
     }
 
     private void SpawnNewBall()
     {
-        // Set a random spawn position within the specified range
+        // Spawn a new ball at a random position
         ballSpawnPosition = GetRandomSpawnPosition();
-
-        // Spawn a new ball at the specified position
         currentBall = Instantiate(BallPrefab, ballSpawnPosition, Quaternion.identity);
-
-        // Start the countdown timer
         isCountdownActive = true;
         countdownTimer = 5f;
     }
 
     private void DestroyBallWithDelay()
     {
-        // Destroy the ball with a delay
+        // Destroy the ball with a small delay
         Destroy(currentBall, 0.1f);
     }
 
     private Vector3 GetRandomSpawnPosition()
     {
-        // Defines the range for the random spawn position
+        // Get a random spawn position within a specified range
         Vector3 spawnRangeMin = new Vector3(-7f, 0.6f, -7f);
         Vector3 spawnRangeMax = new Vector3(7f, 0.6f, 7f);
-
-        // Generates random spawn position within the specified range
         float randomX = Random.Range(spawnRangeMin.x, spawnRangeMax.x);
         float randomY = Random.Range(spawnRangeMin.y, spawnRangeMax.y);
         float randomZ = Random.Range(spawnRangeMin.z, spawnRangeMax.z);
-
         return new Vector3(randomX, randomY, randomZ);
-    }
-
-    private int GetScore()
-    {
-        return score;
     }
 }
