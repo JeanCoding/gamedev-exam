@@ -38,5 +38,6 @@ De documentatie van dit project is te vinden in de `Documentatie` map.
 
 - Game Design Document.docx
 - Logboek.docx
+- BasketBall Madness GameDev Examen (Jean Presentatie).pdf
 - Ontwikkelomgeving.docx
 - Overdrachtdocument.docx
