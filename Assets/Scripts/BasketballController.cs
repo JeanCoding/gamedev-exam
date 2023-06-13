@@ -15,26 +15,26 @@ public class BasketballController : MonoBehaviour
     public Text scoreText;
     public Text timerText;
 
-    private bool isBallInHands = true;
-    private bool isBallFlying = false;
-    private bool isCountdownActive = false;
-    private float ballThrowDuration = 0.7f;
-    private float t = 0;
-    private int score = 0;
-    private float timer = 20f;
-    private float countdownTimer = 5f;
-    private bool isGameOver = false;
-    private GameObject currentBall;
-    private Vector3 ballSpawnPosition;
+    bool isBallInHands = true;
+    bool isBallFlying = false;
+    bool isCountdownActive = false;
+    float ballThrowDuration = 0.7f;
+    float t = 0;
+    int score = 0;
+    float timer = 20f;
+    float countdownTimer = 5f;
+    bool isGameOver = false;
+    GameObject currentBall;
+    Vector3 ballSpawnPosition;
 
-    private void Start()
+    void Start()
     {
         GetRandomSpawnPosition();
         SpawnNewBall();
         UpdateTimerText();
     }
 
-    private void Update()
+    void Update()
     {
         if (isGameOver)
             return;
@@ -52,7 +52,7 @@ public class BasketballController : MonoBehaviour
             UpdateCountdownTimer();
     }
 
-    private void HandlePlayerMovement()
+    void HandlePlayerMovement()
     {
         // Player movement based on input
         Vector3 direction = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
@@ -60,7 +60,7 @@ public class BasketballController : MonoBehaviour
         transform.LookAt(transform.position + direction);
     }
 
-    private void HandleBallInHands()
+    void HandleBallInHands()
     {
         // Ball handling when it is in the player's hands
         if (Input.GetKey(KeyCode.Space))
@@ -87,7 +87,7 @@ public class BasketballController : MonoBehaviour
         }
     }
 
-    private void HandleBallInAir()
+    void HandleBallInAir()
     {
         // Ball behavior when it is in the air after being thrown
         t += Time.deltaTime;
@@ -122,7 +122,7 @@ public class BasketballController : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    void OnTriggerEnter(Collider other)
     {
         // Handle catching the ball and starting the countdown timer
         if (!isBallInHands && !isBallFlying)
@@ -135,7 +135,7 @@ public class BasketballController : MonoBehaviour
         }
     }
 
-    private void UpdateTimer()
+    void UpdateTimer()
     {
         // Update the timer
         if (timer > 0f)
@@ -155,7 +155,7 @@ public class BasketballController : MonoBehaviour
         }
     }
 
-    private void UpdateCountdownTimer()
+    void UpdateCountdownTimer()
     {
         // Update the countdown timer
         countdownTimer -= Time.deltaTime;
@@ -178,13 +178,13 @@ public class BasketballController : MonoBehaviour
         }
     }
 
-    private void UpdateTimerText()
+    void UpdateTimerText()
     {
         // Update the timer UI text
         timerText.text = "Time: " + Mathf.Ceil(timer).ToString();
     }
 
-    private void GameOver()
+    void GameOver()
     {
         // Set the game over state and load the game over scene
         isGameOver = true;
@@ -192,7 +192,7 @@ public class BasketballController : MonoBehaviour
         PlayerPrefs.SetInt("FinalScore", score);
     }
 
-    private void SpawnNewBall()
+    void SpawnNewBall()
     {
         // Spawn a new ball at a random position
         ballSpawnPosition = GetRandomSpawnPosition();
@@ -201,13 +201,13 @@ public class BasketballController : MonoBehaviour
         countdownTimer = 5f;
     }
 
-    private void DestroyBallWithDelay()
+    void DestroyBallWithDelay()
     {
         // Destroy the ball with a small delay
         Destroy(currentBall, 0.1f);
     }
 
-    private Vector3 GetRandomSpawnPosition()
+     Vector3 GetRandomSpawnPosition()
     {
         // Get a random spawn position within a specified range
         Vector3 spawnRangeMin = new Vector3(-7f, 0.6f, -7f);
